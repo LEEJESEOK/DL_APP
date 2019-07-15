@@ -1,52 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.testApplication">
+          package="com.example.testApplication">
 
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
     <application
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+            android:allowBackup="true"
+            android:icon="@mipmap/ic_launcher"
+            android:label="@string/app_name"
+            android:roundIcon="@mipmap/ic_launcher_round"
+            android:supportsRtl="true"
+            android:theme="@style/AppTheme">
         <activity android:name=".ExpandableListViewTestActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter></activity>
-        <activity android:name=".BleDeviceActivity" />
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".BleDeviceActivity"/>
         <activity android:name=".MainActivity">
         </activity> <!-- child of MainActivity -->
         <activity
-            android:name=".MotorActivity"
-            android:label="@string/activity_title_motor"
-            android:parentActivityName=".MainActivity" />
+                android:name=".MotorActivity"
+                android:label="@string/activity_title_motor"
+                android:parentActivityName=".MainActivity"/>
         <activity
-            android:name=".TouchActivity"
-            android:label="@string/activity_title_touch"
-            android:parentActivityName=".MainActivity" />
+                android:name=".TouchActivity"
+                android:label="@string/activity_title_touch"
+                android:parentActivityName=".MainActivity"/>
         <activity
-            android:name=".LEDActivity"
-            android:label="@string/activity_title_LED"
-            android:parentActivityName=".MainActivity" />
+                android:name=".LEDActivity"
+                android:label="@string/activity_title_LED"
+                android:parentActivityName=".MainActivity"/>
         <activity
-            android:name=".BuzzerActivity"
-            android:label="@string/activity_title_buzzer"
-            android:parentActivityName=".MainActivity" />
+                android:name=".BuzzerActivity"
+                android:label="@string/activity_title_buzzer"
+                android:parentActivityName=".MainActivity"/>
         <activity
-            android:name=".BleActivity"
-            android:label="@string/activity_title_BLE"
-            android:parentActivityName=".MainActivity" />
+                android:name=".BleActivity"
+                android:label="@string/activity_title_BLE"
+                android:parentActivityName=".MainActivity"/>
 
         <service
-            android:name=".BluetoothLeService"
-            android:enabled="true" />
+                android:name=".BluetoothLeService"
+                android:enabled="true"/>
     </application>
 
 </manifest>
