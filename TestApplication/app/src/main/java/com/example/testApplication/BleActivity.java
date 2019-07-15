@@ -45,6 +45,62 @@ public class BleActivity extends AppCompatActivity {
 
     // ms 단위
     private static final int SCAN_PERIOD = 10000;
+    // scan : true, stop : false
+    private int scanButtonFlag = STATE_STOP;
+    // state of connecting gatt server
+    private boolean mConnected = false;
+    // Handles various events fired by the Service.
+    // ACTION_GATT_CONNECTED: connected to a GATT server.
+    // ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
+    // ACTION_GATT_SERVICES_DISCOVERED: discovered GATT services.
+    // ACTION_DATA_AVAILABLE: received data from the device. This can be a
+    // result of read or notification operations.
+    private final BroadcastReceiver gattUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
+                Log.d(TAG, "Connect");
+                mConnected = true;
+//                updateConnectionState(R.string.connected);
+//                invalidateOptionsMenu();
+            } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
+                Log.d(TAG, "disconnect");
+                mConnected = false;
+//                updateConnectionState(R.string.disconnected);
+//                invalidateOptionsMenu();
+//                clearUI();
+            }
+        }
+    };
+    private BluetoothAdapter mBluetoothAdapter;
+    private String mDeviceAddress;
+    private BluetoothLeService mBluetoothLeService;
+    // Code to manage Service lifecycle.
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
+            if (!mBluetoothLeService.initialize()) {
+                Log.e(TAG, "Unable to initialize Bluetooth");
+                finish();
+            }
+            // Automatically connects to the device upon successful start-up initialization.
+            mBluetoothLeService.connect(mDeviceAddress);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mBluetoothLeService = null;
+        }
+    };
+    private BluetoothLeScanner mBLEScanner;
+
+    private Button scanButton;
+    private Button disconnectButton;
+    private ListView deviceListView;
+    private ArrayList<HashMap<String, String>> deviceArrayList;
+    private SimpleAdapter deviceListAdapter;
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private final ScanCallback mScanCallback = new ScanCallback() {
 
@@ -96,65 +152,49 @@ public class BleActivity extends AppCompatActivity {
             });
         }
     };
-    // scan : true, stop : false
-    private int scanButtonFlag = STATE_STOP;
-
-    // state of connecting gatt server
-    private boolean mConnected = false;
-    // Handles various events fired by the Service.
-    // ACTION_GATT_CONNECTED: connected to a GATT server.
-    // ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
-    // ACTION_GATT_SERVICES_DISCOVERED: discovered GATT services.
-    // ACTION_DATA_AVAILABLE: received data from the device. This can be a
-    // result of read or notification operations.
-    private final BroadcastReceiver gattUpdateReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
-                Log.d(TAG, "Connect");
-                mConnected = true;
-//                updateConnectionState(R.string.connected);
-//                invalidateOptionsMenu();
-            } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
-                Log.d(TAG, "disconnect");
-                mConnected = false;
-//                updateConnectionState(R.string.disconnected);
-//                invalidateOptionsMenu();
-//                clearUI();
-            }
-        }
-    };
-    private BluetoothAdapter mBluetoothAdapter;
-    private String mDeviceAddress;
-    private BluetoothLeService mBluetoothLeService;
-    private BluetoothLeScanner mBLEScanner;
-
-    private Button scanButton;
-    private Button disconnectButton;
-    private ListView deviceListView;
-    private ArrayList<HashMap<String, String>> deviceArrayList;
-    private SimpleAdapter deviceListAdapter;
-    // Code to manage Service lifecycle.
-    private final ServiceConnection mServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder service) {
-            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
-            if (!mBluetoothLeService.initialize()) {
-                Log.e(TAG, "Unable to initialize Bluetooth");
-                finish();
-            }
-            // Automatically connects to the device upon successful start-up initialization.
-            mBluetoothLeService.connect(mDeviceAddress);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            mBluetoothLeService = null;
-        }
-    };
     //TODO name, address filter
     private EditText searchEditText;
+
+    private void setLayout() {
+        scanButton = findViewById(R.id.scan_button);
+        scanButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (scanButtonFlag == STATE_STOP) // scan start
+                    startScan();
+                else // scan stop
+                    stopScan();
+            }
+        });
+
+        disconnectButton = findViewById(R.id.disconnect_button);
+        disconnectButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                disconnectButton.setVisibility(View.GONE);
+                mBluetoothLeService.disconnect();
+                Toast.makeText(BleActivity.this, "disconnect", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        searchEditText = findViewById(R.id.search_editText);
+
+        deviceArrayList = new ArrayList<>();
+
+        deviceListAdapter = new SimpleAdapter(this, deviceArrayList, android.R.layout.simple_list_item_2, new String[]{"name", "address"},
+                new int[]{android.R.id.text1, android.R.id.text2});
+
+        deviceListView = findViewById(R.id.device_listView);
+        deviceListView.setAdapter(deviceListAdapter);
+        deviceListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                mDeviceAddress = deviceArrayList.get(position).get("address");
+                connectDevice(mDeviceAddress);
+
+            }
+        });
+    }
 
     private void startScan() {
         scanButtonFlag = STATE_SCAN;
@@ -187,7 +227,7 @@ public class BleActivity extends AppCompatActivity {
             Toast.makeText(BleActivity.this, "connect", Toast.LENGTH_SHORT).show();
             disconnectButton.setVisibility(View.VISIBLE);
 
-            Log.d(TAG, "GATT Services"+mBluetoothLeService.getSupportedGattServices());
+            Log.d(TAG, "GATT Services" + mBluetoothLeService.getSupportedGattServices());
         }
     }
 
@@ -231,44 +271,7 @@ public class BleActivity extends AppCompatActivity {
         }
 
 
-        scanButton = findViewById(R.id.scan_button);
-        scanButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (scanButtonFlag == STATE_STOP) // scan start
-                    startScan();
-                else // scan stop
-                    stopScan();
-            }
-        });
-
-        disconnectButton = findViewById(R.id.disconnect_button);
-        disconnectButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                disconnectButton.setVisibility(View.GONE);
-                mBluetoothLeService.disconnect();
-                Toast.makeText(BleActivity.this, "disconnect", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        searchEditText = findViewById(R.id.search_editText);
-
-        deviceArrayList = new ArrayList<>();
-
-        deviceListAdapter = new SimpleAdapter(this, deviceArrayList, android.R.layout.simple_list_item_2, new String[]{"name", "address"},
-                new int[]{android.R.id.text1, android.R.id.text2});
-
-        deviceListView = findViewById(R.id.device_listView);
-        deviceListView.setAdapter(deviceListAdapter);
-        deviceListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                mDeviceAddress = deviceArrayList.get(position).get("address");
-                connectDevice(mDeviceAddress);
-
-            }
-        });
+        setLayout();
 
         Intent gattServiceIntent = new Intent(BleActivity.this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
