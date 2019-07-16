@@ -27,6 +27,14 @@ public class SampleGattAttributes {
     public static String CLIENT_CHARACTERISTIC_CONFIG = "00002902-0000-1000-8000-00805f9b34fb";
 
     static {
+        // nordic nrf 서비스 목록
+        attributes.put("00001800-0000-1000-8000-00805f9b34fb", "Generic Access");
+        attributes.put("00001801-0000-1000-8000-00805f9b34fb", "Generic Attribute");
+        attributes.put("00001804-0000-1000-8000-00805f9b34fb", "Tx Power");
+        attributes.put("00001802-0000-1000-8000-00805f9b34fb", "Immediate Alert");
+        attributes.put("00001803-0000-1000-8000-00805f9b34fb", "Link Loss");
+        attributes.put("0000180f-0000-1000-8000-00805f9b34fb", "Battery Service");
+
         // Sample Services.
         attributes.put("0000180d-0000-1000-8000-00805f9b34fb", "Heart Rate Service");
         attributes.put("0000180a-0000-1000-8000-00805f9b34fb", "Device Information Service");

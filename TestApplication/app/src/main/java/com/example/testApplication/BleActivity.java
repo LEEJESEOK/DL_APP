@@ -73,9 +73,6 @@ public class BleActivity extends AppCompatActivity {
             mBluetoothLeService = null;
         }
     };
-    private BluetoothLeScanner mBLEScanner;
-    private Button scanButton;
-    private Button disconnectButton;
     // Handles various events fired by the Service.
     // ACTION_GATT_CONNECTED: connected to a GATT server.
     // ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
@@ -98,15 +95,18 @@ public class BleActivity extends AppCompatActivity {
                 mConnected = false;
             } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
                 Log.d(TAG, "Services Discovered");
+                Log.d(TAG, "GATT Services" + mBluetoothLeService.getSupportedGattServices());
 
-                mBluetoothLeService.getSupportedGattServices();
+                //TODO characteristic 권한 설정
+//                mBluetoothLeService.setCharacteristicNotification();
+
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
                 Log.d(TAG, "Data Available");
-
             }
         }
     };
-    private ListView deviceListView;
+    private BluetoothLeScanner mBLEScanner;
+    private Button scanButton, disconnectButton;
     private ArrayList<HashMap<String, String>> deviceArrayList;
     private SimpleAdapter deviceListAdapter;
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -210,7 +210,7 @@ public class BleActivity extends AppCompatActivity {
         deviceListAdapter = new SimpleAdapter(this, deviceArrayList, android.R.layout.simple_list_item_2, new String[]{"name", "address"},
             new int[]{android.R.id.text1, android.R.id.text2});
 
-        deviceListView = findViewById(R.id.device_listView);
+        ListView deviceListView = findViewById(R.id.device_listView);
         deviceListView.setAdapter(deviceListAdapter);
         deviceListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -251,8 +251,6 @@ public class BleActivity extends AppCompatActivity {
             Toast.makeText(BleActivity.this, "connect", Toast.LENGTH_SHORT).show();
 
             disconnectButton.setVisibility(View.VISIBLE);
-
-            Log.d(TAG, "GATT Services" + mBluetoothLeService.getSupportedGattServices());
         }
     }
 
