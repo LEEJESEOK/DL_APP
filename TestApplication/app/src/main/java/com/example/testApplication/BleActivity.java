@@ -10,10 +10,12 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -35,7 +37,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class BleActivity extends AppCompatActivity {
-    private static final String TAG = "BLE Activity";
+    private static final String TAG = BleActivity.class.getSimpleName();
 
     private static final int REQUEST_ENABLE_BT = 1;
     private static final int REQUEST_ENABLE_GPS = 2;
@@ -44,36 +46,12 @@ public class BleActivity extends AppCompatActivity {
     private static final int STATE_SCAN = 1;
 
     // ms 단위
-    private static final int SCAN_PERIOD = 10000;
+    private static final int SCAN_PERIOD = 100000;
     // scan : true, stop : false
     private int scanButtonFlag = STATE_STOP;
 
     // state of connecting gatt server
     private boolean mConnected = false;
-    // Handles various events fired by the Service.
-    // ACTION_GATT_CONNECTED: connected to a GATT server.
-    // ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
-    // ACTION_GATT_SERVICES_DISCOVERED: discovered GATT services.
-    // ACTION_DATA_AVAILABLE: received data from the device. This can be a
-    // result of read or notification operations.
-    private final BroadcastReceiver gattUpdateReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
-                Log.d(TAG, "Connect");
-                mConnected = true;
-//                updateConnectionState(R.string.connected);
-//                invalidateOptionsMenu();
-            } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
-                Log.d(TAG, "disconnect");
-                mConnected = false;
-//                updateConnectionState(R.string.disconnected);
-//                invalidateOptionsMenu();
-//                clearUI();
-            }
-        }
-    };
     private BluetoothAdapter mBluetoothAdapter;
     private String mDeviceAddress;
     private BluetoothLeService mBluetoothLeService;
@@ -96,9 +74,38 @@ public class BleActivity extends AppCompatActivity {
         }
     };
     private BluetoothLeScanner mBLEScanner;
-
     private Button scanButton;
     private Button disconnectButton;
+    // Handles various events fired by the Service.
+    // ACTION_GATT_CONNECTED: connected to a GATT server.
+    // ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
+    // ACTION_GATT_SERVICES_DISCOVERED: discovered GATT services.
+    // ACTION_DATA_AVAILABLE: received data from the device. This can be a
+    // result of read or notification operations.
+    private final BroadcastReceiver gattUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
+                Log.d(TAG, "Connect");
+
+                mConnected = true;
+            } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
+                Log.d(TAG, "disconnect");
+
+                disconnectButton.callOnClick();
+
+                mConnected = false;
+            } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
+                Log.d(TAG, "Services Discovered");
+
+                mBluetoothLeService.getSupportedGattServices();
+            } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
+                Log.d(TAG, "Data Available");
+
+            }
+        }
+    };
     private ListView deviceListView;
     private ArrayList<HashMap<String, String>> deviceArrayList;
     private SimpleAdapter deviceListAdapter;
@@ -124,7 +131,7 @@ public class BleActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d(TAG, "Scan name : " + result.getDevice().getName() + "\n address : " + result.getDevice().getAddress());
+//                    Log.d(TAG, "Scan name : " + result.getDevice().getName() + "\n address : " + result.getDevice().getAddress());
 
                     HashMap<String, String> item = new HashMap<>();
                     boolean itemFlag = true;
@@ -138,6 +145,7 @@ public class BleActivity extends AppCompatActivity {
                     item.put("address", result.getDevice().getAddress());
 
                     // 이미 검색된 기기(주소)일 경우 추가하지 않음, 이름이 확인될 경우 갱신
+                    // contains 메소드로 수정 가능
                     for (HashMap<String, String> i : deviceArrayList)
                         if (Objects.requireNonNull(i.get("address")).equals(item.get("address"))) {
                             i.put("name", item.get("name"));
@@ -156,14 +164,31 @@ public class BleActivity extends AppCompatActivity {
     //TODO name, address filter
     private EditText searchEditText;
 
+    private static IntentFilter makeGattUpdateIntentFilter() {
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
+        intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
+        return intentFilter;
+    }
+
     private void setLayout() {
         scanButton = findViewById(R.id.scan_button);
         scanButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (scanButtonFlag == STATE_STOP) // scan start
+                if (scanButtonFlag == STATE_STOP) { // scan start
                     startScan();
-                else // scan stop
+
+                    // SCAN_PERIOD 후에 stop scan
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            stopScan();
+                        }
+                    }, SCAN_PERIOD);
+                } else // scan stop
                     stopScan();
             }
         });
@@ -183,7 +208,7 @@ public class BleActivity extends AppCompatActivity {
         deviceArrayList = new ArrayList<>();
 
         deviceListAdapter = new SimpleAdapter(this, deviceArrayList, android.R.layout.simple_list_item_2, new String[]{"name", "address"},
-                new int[]{android.R.id.text1, android.R.id.text2});
+            new int[]{android.R.id.text1, android.R.id.text2});
 
         deviceListView = findViewById(R.id.device_listView);
         deviceListView.setAdapter(deviceListAdapter);
@@ -191,8 +216,8 @@ public class BleActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mDeviceAddress = deviceArrayList.get(position).get("address");
-                connectDevice(mDeviceAddress);
 
+                connectDevice(mDeviceAddress);
             }
         });
     }
@@ -208,7 +233,6 @@ public class BleActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             mBLEScanner.startScan(mScanCallback);
         }
-//      mBluetoothAdapter.startDiscovery();
     }
 
     private void stopScan() {
@@ -219,13 +243,13 @@ public class BleActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             mBLEScanner.stopScan(mScanCallback);
         }
-//      mBluetoothAdapter.cancelDiscovery();
     }
 
     private void connectDevice(final String address) {
         Log.d(TAG, "address : " + address);
         if (mBluetoothLeService.connect(address)) {
             Toast.makeText(BleActivity.this, "connect", Toast.LENGTH_SHORT).show();
+
             disconnectButton.setVisibility(View.VISIBLE);
 
             Log.d(TAG, "GATT Services" + mBluetoothLeService.getSupportedGattServices());
@@ -236,6 +260,7 @@ public class BleActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ble);
+
 
         PackageManager packageManager = getPackageManager();
 
@@ -281,10 +306,14 @@ public class BleActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
         if (!mBluetoothAdapter.isEnabled()) {
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
         }
+
+
+        registerReceiver(gattUpdateReceiver, makeGattUpdateIntentFilter());
     }
 
     @Override
@@ -292,11 +321,15 @@ public class BleActivity extends AppCompatActivity {
         super.onPause();
 
         stopScan();
+        unregisterReceiver(gattUpdateReceiver);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        unbindService(mServiceConnection);
+        mBluetoothLeService = null;
     }
 
     @Override

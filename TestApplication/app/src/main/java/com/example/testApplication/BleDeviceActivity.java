@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import java.util.ArrayList;
 
 public class BleDeviceActivity extends AppCompatActivity {
+    private static final String TAG = BleDeviceActivity.class.getSimpleName();
 
     private ArrayList<String> services;
     private ArrayList<String> characteristics;
