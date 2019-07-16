@@ -47,6 +47,7 @@ public class BleActivity extends AppCompatActivity {
     private static final int SCAN_PERIOD = 10000;
     // scan : true, stop : false
     private int scanButtonFlag = STATE_STOP;
+
     // state of connecting gatt server
     private boolean mConnected = false;
     // Handles various events fired by the Service.
