@@ -312,7 +312,6 @@ public class BleActivity extends AppCompatActivity {
             startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
         }
 
-
         registerReceiver(gattUpdateReceiver, makeGattUpdateIntentFilter());
     }
 

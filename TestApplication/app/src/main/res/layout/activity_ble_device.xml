@@ -5,4 +5,11 @@
     android:layout_height="match_parent"
     tools:context=".BleDeviceActivity">
 
+    <ExpandableListView
+        android:id="@+id/expandableListView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </ExpandableListView>
+
 </LinearLayout>
