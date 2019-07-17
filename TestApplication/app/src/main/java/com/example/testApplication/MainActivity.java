@@ -24,31 +24,31 @@ public class MainActivity extends AppCompatActivity {
         motorButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(), MotorActivity.class));
+                startActivity(new Intent(MainActivity.this, MotorActivity.class));
             }
         });
         touchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(), TouchActivity.class));
+                startActivity(new Intent(MainActivity.this, TouchActivity.class));
             }
         });
         LEDButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(), LEDActivity.class));
+                startActivity(new Intent(MainActivity.this, LEDActivity.class));
             }
         });
         buzzerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(), BuzzerActivity.class));
+                startActivity(new Intent(MainActivity.this, BuzzerActivity.class));
             }
         });
         BLEButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(), BleActivity.class));
+                startActivity(new Intent(MainActivity.this, BleScanActivity.class));
             }
         });
 
