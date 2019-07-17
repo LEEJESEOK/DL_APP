@@ -6,6 +6,7 @@
     <string name="activity_title_LED">LED Activity</string>
     <string name="activity_title_buzzer">Buzzer Activity</string>
     <string name="activity_title_BLE">BLE Activity</string>
+    <string name="activity_title_BLEDevice">BLE Device Activity</string>
 
     <string name="scan_button">Scan for devices</string>
     <string name="stop">Stop</string>

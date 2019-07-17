@@ -17,10 +17,10 @@ public class BaseExpandableAdapter extends BaseExpandableListAdapter {
     private LayoutInflater inflater;
     private ViewHolder viewHolder = null;
 
-    public BaseExpandableAdapter(Context c, ArrayList<String> groupList,
+    public BaseExpandableAdapter(Context context, ArrayList<String> groupList,
                                  ArrayList<ArrayList<String>> childList) {
         super();
-        this.inflater = LayoutInflater.from(c);
+        this.inflater = LayoutInflater.from(context);
         this.groupList = groupList;
         this.childList = childList;
     }
@@ -48,16 +48,16 @@ public class BaseExpandableAdapter extends BaseExpandableListAdapter {
     public View getGroupView(int groupPosition, boolean isExpanded,
                              View convertView, ViewGroup parent) {
 
-        View v = convertView;
+        View view = convertView;
 
-        if (v == null) {
+        if (view == null) {
             viewHolder = new ViewHolder();
-            v = inflater.inflate(R.layout.list_row, parent, false);
-            viewHolder.tv_groupName = v.findViewById(R.id.tv_group);
-            viewHolder.iv_image = v.findViewById(R.id.iv_image);
-            v.setTag(viewHolder);
+            view = inflater.inflate(R.layout.list_row_test, parent, false);
+            viewHolder.tv_groupName = view.findViewById(R.id.tv_group);
+            viewHolder.iv_image = view.findViewById(R.id.iv_image);
+            view.setTag(viewHolder);
         } else {
-            viewHolder = (ViewHolder) v.getTag();
+            viewHolder = (ViewHolder) view.getTag();
         }
 
         // 그룹을 펼칠때와 닫을때 아이콘을 변경해 준다.
@@ -69,7 +69,7 @@ public class BaseExpandableAdapter extends BaseExpandableListAdapter {
 
         viewHolder.tv_groupName.setText(getGroup(groupPosition));
 
-        return v;
+        return view;
     }
 
     // 차일드뷰를 반환한다.
@@ -99,7 +99,7 @@ public class BaseExpandableAdapter extends BaseExpandableListAdapter {
 
         if (v == null) {
             viewHolder = new ViewHolder();
-            v = inflater.inflate(R.layout.list_row, null);
+            v = inflater.inflate(R.layout.list_row_test, null);
             viewHolder.tv_childName = v.findViewById(R.id.tv_child);
             v.setTag(viewHolder);
         } else {
