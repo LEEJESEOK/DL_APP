@@ -6,7 +6,7 @@
     android:focusable="true"
     android:focusableInTouchMode="true"
     android:orientation="vertical"
-    tools:context=".BleActivity">
+    tools:context=".BleScanActivity">
 
     <LinearLayout
         android:layout_width="match_parent"

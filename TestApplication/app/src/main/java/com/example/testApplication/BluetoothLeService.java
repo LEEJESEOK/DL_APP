@@ -50,12 +50,12 @@ public class BluetoothLeService extends Service {
         "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
     public final static String EXTRA_DATA =
         "com.example.bluetooth.le.EXTRA_DATA";
-    public final static String ACTION_DATA_NOTIFY =
-        "com.example.bluetooth.le.ACTION_DATA_NOTIFY";
-    public final static String ACTION_DATA_READ =
-        "com.example.bluetooth.le.ACTION_DATA_READ";
-    public final static String ACTION_DATA_WRITE =
-        "com.example.bluetooth.le.ACTION_DATA_WRITE";
+//    public final static String ACTION_DATA_NOTIFY =
+//        "com.example.bluetooth.le.ACTION_DATA_NOTIFY";
+//    public final static String ACTION_DATA_READ =
+//        "com.example.bluetooth.le.ACTION_DATA_READ";
+//    public final static String ACTION_DATA_WRITE =
+//        "com.example.bluetooth.le.ACTION_DATA_WRITE";
 
     public final static UUID UUID_HEART_RATE_MEASUREMENT =
         UUID.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
@@ -125,16 +125,6 @@ public class BluetoothLeService extends Service {
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicWrite(gatt, characteristic, status);
-        }
-
-        @Override
-        public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
-            super.onDescriptorRead(gatt, descriptor, status);
-        }
-
-        @Override
-        public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
-            super.onDescriptorWrite(gatt, descriptor, status);
         }
     };
 
