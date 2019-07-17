@@ -109,7 +109,6 @@ public class BleScanActivity extends AppCompatActivity {
     };
 
 
-
     private void setLayout() {
         scanButton = findViewById(R.id.scan_button);
         scanButton.setOnClickListener(new View.OnClickListener() {
@@ -144,10 +143,8 @@ public class BleScanActivity extends AppCompatActivity {
         searchEditText = findViewById(R.id.search_editText);
 
         deviceArrayList = new ArrayList<>();
-
         deviceListAdapter = new SimpleAdapter(this, deviceArrayList, android.R.layout.simple_list_item_2, new String[]{"name", "address"},
             new int[]{android.R.id.text1, android.R.id.text2});
-
         deviceListView = findViewById(R.id.device_listView);
         deviceListView.setAdapter(deviceListAdapter);
         deviceListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -232,8 +229,6 @@ public class BleScanActivity extends AppCompatActivity {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
             }
         }
-
-
 
         // API level 21부터 'BluetoothLeScanner'를 통해 scan
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

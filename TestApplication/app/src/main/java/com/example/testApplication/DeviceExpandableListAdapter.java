@@ -8,16 +8,21 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class DeviceExpandableListAdapter extends BaseExpandableListAdapter {
 
-    private ArrayList<String> serviceList;
-    private ArrayList<ArrayList<String>> characteristicList;
+    private final String LIST_NAME = "NAME";
+    private final String LIST_UUID = "UUID";
+    private final String LIST_VALUE = "VALUE";
+
+    private ArrayList<HashMap<String, String>> serviceList;
+    private ArrayList<ArrayList<HashMap<String, String>>> characteristicList;
     private LayoutInflater inflater;
     private ViewHolder viewHolder;
 
-    public DeviceExpandableListAdapter(Context context, ArrayList<String> serviceList,
-                                       ArrayList<ArrayList<String>> characteristicList) {
+    public DeviceExpandableListAdapter(Context context, ArrayList<HashMap<String, String>> serviceList,
+                                       ArrayList<ArrayList<HashMap<String, String>>> characteristicList) {
         super();
 
         this.inflater = LayoutInflater.from(context);
@@ -26,7 +31,7 @@ public class DeviceExpandableListAdapter extends BaseExpandableListAdapter {
     }
 
     @Override
-    public String getGroup(int groupPosition) {
+    public HashMap<String, String> getGroup(int groupPosition) {
         return serviceList.get(groupPosition);
     }
 
@@ -46,11 +51,13 @@ public class DeviceExpandableListAdapter extends BaseExpandableListAdapter {
 
         if (view == null) {
             viewHolder = new ViewHolder();
-            view = inflater.inflate(R.layout.service_list_row, parent, false);
+            view = inflater.inflate(R.layout.list_service_row, parent, false);
             viewHolder.serviceNameTextView = view.findViewById(R.id.service_textView);
             view.setTag(viewHolder);
         } else
             viewHolder = (ViewHolder) view.getTag();
+
+        viewHolder.serviceNameTextView.setText(getGroup(groupPosition).get(LIST_NAME));
 
         // 그룹이 열리고 닫힐 때 처리
 //        if (isExpanded) {
@@ -62,7 +69,7 @@ public class DeviceExpandableListAdapter extends BaseExpandableListAdapter {
     }
 
     @Override
-    public String getChild(int groupPosition, int childPosition) {
+    public HashMap<String, String> getChild(int groupPosition, int childPosition) {
         return characteristicList.get(groupPosition).get(childPosition);
     }
 
@@ -82,14 +89,22 @@ public class DeviceExpandableListAdapter extends BaseExpandableListAdapter {
         View view = convertView;
 
         if (view == null) {
-            view = inflater.inflate(R.layout.service_list_row, null);
-            viewHolder.characteristicNameTextView = view.findViewById(R.id.characteristic_textView);
+            view = inflater.inflate(R.layout.list_service_row, null);
+            viewHolder.characteristicNameTextView = view.findViewById(R.id.characteristic_name_textView);
+            viewHolder.characteristicUUIDTextView = view.findViewById(R.id.characteristic_uuid_textView);
+            viewHolder.characteristicValueTextView = view.findViewById(R.id.characteristic_value_textView);
             view.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) view.getTag();
         }
 
-        viewHolder.characteristicNameTextView.setText(getChild(groupPosition, childPosition));
+        viewHolder.characteristicNameTextView.setText(getChild(groupPosition, childPosition).get(LIST_NAME));
+        viewHolder.characteristicUUIDTextView.setText(getChild(groupPosition, childPosition).get(LIST_UUID));
+        if (getChild(groupPosition, childPosition).containsKey(LIST_VALUE)) {
+            viewHolder.characteristicValueTextView.setText(getChild(groupPosition, childPosition).get(LIST_VALUE));
+            viewHolder.characteristicValueTextView.setVisibility(View.VISIBLE);
+        } else
+            viewHolder.characteristicValueTextView.setVisibility(View.GONE);
 
         return view;
     }
@@ -107,5 +122,7 @@ public class DeviceExpandableListAdapter extends BaseExpandableListAdapter {
     class ViewHolder {
         public TextView serviceNameTextView;
         public TextView characteristicNameTextView;
+        public TextView characteristicUUIDTextView;
+        public TextView characteristicValueTextView;
     }
 }

@@ -15,13 +15,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".ExpandableListViewTestActivity" />
-        <activity android:name=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        <activity
+            android:name=".MainActivity"
+            android:launchMode="singleTop" />
         <!-- child of MainActivity -->
         <activity
             android:name=".MotorActivity"
@@ -42,7 +38,14 @@
         <activity
             android:name=".BleScanActivity"
             android:label="@string/activity_title_BLE"
-            android:parentActivityName=".MainActivity" />
+            android:launchMode="singleTop"
+            android:parentActivityName=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".BleDeviceActivity"
             android:parentActivityName=".BleScanActivity" />

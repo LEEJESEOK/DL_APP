@@ -22,14 +22,6 @@
             android:layout_gravity="center"
             android:text="@string/scan_button" />
 
-        <Button
-            android:id="@+id/disconnect_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/title_disconnect"
-            android:visibility="gone" />
-
     </LinearLayout>
 
     <EditText

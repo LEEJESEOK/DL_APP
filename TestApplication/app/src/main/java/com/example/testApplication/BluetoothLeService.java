@@ -58,12 +58,14 @@ public class BluetoothLeService extends Service {
 //        "com.example.bluetooth.le.ACTION_DATA_WRITE";
 
     public final static UUID UUID_HEART_RATE_MEASUREMENT =
-        UUID.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
+        UUID.fromString(GattAttributes.HEART_RATE_MEASUREMENT);
 
     private final static String TAG = BluetoothLeService.class.getSimpleName();
+
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTING = 1;
     private static final int STATE_CONNECTED = 2;
+
     private final IBinder mBinder = new LocalBinder();
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
@@ -307,7 +309,7 @@ public class BluetoothLeService extends Service {
         // This is specific to Heart Rate Measurement.
         if (UUID_HEART_RATE_MEASUREMENT.equals(characteristic.getUuid())) {
             BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
-                UUID.fromString(SampleGattAttributes.CLIENT_CHARACTERISTIC_CONFIG));
+                UUID.fromString(GattAttributes.CLIENT_CHARACTERISTIC_CONFIG));
             descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
             mBluetoothGatt.writeDescriptor(descriptor);
         }
