@@ -182,7 +182,7 @@ public class BleScanActivity extends AppCompatActivity {
 
     private void stopScan() {
         mScanning = SCAN_STATE_STOP;
-        scanButton.setText(R.string.scan_button);
+        scanButton.setText(R.string.scan);
         Log.d(TAG, "click stop button");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
