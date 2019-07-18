@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class DeviceExpandableListAdapter extends BaseExpandableListAdapter {
+    private static final String TAG = DeviceExpandableListAdapter.class.getSimpleName();
 
     private final String LIST_NAME = "NAME";
     private final String LIST_UUID = "UUID";
@@ -46,16 +47,15 @@ public class DeviceExpandableListAdapter extends BaseExpandableListAdapter {
     }
 
     @Override
-    public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-        View view = convertView;
-
-        if (view == null) {
+    public View getGroupView(int groupPosition, boolean isExpanded,
+                             View convertView, ViewGroup parent) {
+        if (convertView == null) {
             viewHolder = new ViewHolder();
-            view = inflater.inflate(R.layout.list_service_row, parent, false);
-            viewHolder.serviceNameTextView = view.findViewById(R.id.service_textView);
-            view.setTag(viewHolder);
+            convertView = inflater.inflate(R.layout.list_service_row, parent, false);
+            viewHolder.serviceNameTextView = convertView.findViewById(R.id.service_textView);
+            convertView.setTag(viewHolder);
         } else
-            viewHolder = (ViewHolder) view.getTag();
+            viewHolder = (ViewHolder) convertView.getTag();
 
         viewHolder.serviceNameTextView.setText(getGroup(groupPosition).get(LIST_NAME));
 
@@ -65,7 +65,7 @@ public class DeviceExpandableListAdapter extends BaseExpandableListAdapter {
 //        } else {
 //
 //        }
-        return view;
+        return convertView;
     }
 
     @Override
@@ -86,17 +86,15 @@ public class DeviceExpandableListAdapter extends BaseExpandableListAdapter {
     @Override
     public View getChildView(int groupPosition, int childPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
-        View view = convertView;
-
-        if (view == null) {
-            view = inflater.inflate(R.layout.list_service_row, null);
-            viewHolder.characteristicNameTextView = view.findViewById(R.id.characteristic_name_textView);
-            viewHolder.characteristicUUIDTextView = view.findViewById(R.id.characteristic_uuid_textView);
-            viewHolder.characteristicValueTextView = view.findViewById(R.id.characteristic_value_textView);
-            view.setTag(viewHolder);
-        } else {
-            viewHolder = (ViewHolder) view.getTag();
-        }
+//        if (convertView == null) {
+        convertView = inflater.inflate(R.layout.list_service_row, null);
+        viewHolder.characteristicNameTextView = convertView.findViewById(R.id.characteristic_name_textView);
+        viewHolder.characteristicUUIDTextView = convertView.findViewById(R.id.characteristic_uuid_textView);
+        viewHolder.characteristicValueTextView = convertView.findViewById(R.id.characteristic_value_textView);
+        convertView.setTag(viewHolder);
+//        } else {
+//            viewHolder = (ViewHolder) convertView.getTag();
+//        }
 
         viewHolder.characteristicNameTextView.setText(getChild(groupPosition, childPosition).get(LIST_NAME));
         viewHolder.characteristicUUIDTextView.setText(getChild(groupPosition, childPosition).get(LIST_UUID));
@@ -106,7 +104,7 @@ public class DeviceExpandableListAdapter extends BaseExpandableListAdapter {
         } else
             viewHolder.characteristicValueTextView.setVisibility(View.GONE);
 
-        return view;
+        return convertView;
     }
 
     @Override

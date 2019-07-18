@@ -37,19 +37,18 @@ public class BleScanActivity extends AppCompatActivity {
     private static final int REQUEST_ENABLE_BT = 1;
     private static final int REQUEST_ENABLE_GPS = 2;
 
-    private static final boolean SCAN_STATE_STOP = false;
-    private static final boolean SCAN_STATE_RUNNING = true;
+    private static final boolean STATE_STOP = false;
+    private static final boolean STATE_RUNNING = true;
 
     // ms 단위
     private static final int SCAN_PERIOD = 100000;
     // scan : true, stop : false
-    private boolean mScanning = SCAN_STATE_STOP;
+    private boolean mScanning = STATE_STOP;
 
     private BluetoothAdapter mBluetoothAdapter;
 
     private BluetoothLeScanner mBLEScanner;
     private Button scanButton;
-    //    private Button disconnectButton;
     //TODO name, address filter
     private EditText searchEditText;
     private ListView deviceListView;
@@ -77,8 +76,6 @@ public class BleScanActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-//                    Log.d(TAG, "Scan name : " + result.getDevice().getName() + "\n address : " + result.getDevice().getAddress());
-
                     HashMap<String, String> item = new HashMap<>();
                     boolean itemFlag = true;
 
@@ -114,7 +111,7 @@ public class BleScanActivity extends AppCompatActivity {
         scanButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mScanning == SCAN_STATE_STOP) { // scan start
+                if (mScanning == STATE_STOP) { // scan start
                     startScan();
 
                     // SCAN_PERIOD 후에 stop scan
@@ -128,16 +125,6 @@ public class BleScanActivity extends AppCompatActivity {
                     stopScan();
             }
         });
-
-//        disconnectButton = findViewById(R.id.disconnect_button);
-//        disconnectButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                disconnectButton.setVisibility(View.GONE);
-//                mBluetoothLeService.disconnect();
-//                Toast.makeText(BleScanActivity.this, "disconnect", Toast.LENGTH_SHORT).show();
-//            }
-//        });
 
         //TODO name, address filter
         searchEditText = findViewById(R.id.search_editText);
@@ -168,7 +155,7 @@ public class BleScanActivity extends AppCompatActivity {
     }
 
     private void startScan() {
-        mScanning = SCAN_STATE_RUNNING;
+        mScanning = STATE_RUNNING;
         scanButton.setText(R.string.stop);
         Log.d(TAG, "click scan button");
 
@@ -181,8 +168,8 @@ public class BleScanActivity extends AppCompatActivity {
     }
 
     private void stopScan() {
-        mScanning = SCAN_STATE_STOP;
-        scanButton.setText(R.string.scan_button);
+        mScanning = STATE_STOP;
+        scanButton.setText(R.string.scan);
         Log.d(TAG, "click stop button");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

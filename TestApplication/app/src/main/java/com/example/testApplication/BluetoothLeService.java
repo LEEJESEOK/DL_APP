@@ -41,22 +41,20 @@ import java.util.UUID;
  */
 public class BluetoothLeService extends Service {
     public final static String ACTION_GATT_CONNECTED =
-        "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
+        "com.example.testApplication.ACTION_GATT_CONNECTED";
     public final static String ACTION_GATT_DISCONNECTED =
-        "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED";
+        "com.example.testApplication.ACTION_GATT_DISCONNECTED";
     public final static String ACTION_GATT_SERVICES_DISCOVERED =
-        "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
+        "com.example.testApplication.ACTION_GATT_SERVICES_DISCOVERED";
     public final static String ACTION_DATA_AVAILABLE =
-        "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
+        "com.example.testApplication.ACTION_DATA_AVAILABLE";
     public final static String EXTRA_DATA =
-        "com.example.bluetooth.le.EXTRA_DATA";
-//    public final static String ACTION_DATA_NOTIFY =
-//        "com.example.bluetooth.le.ACTION_DATA_NOTIFY";
-//    public final static String ACTION_DATA_READ =
-//        "com.example.bluetooth.le.ACTION_DATA_READ";
-//    public final static String ACTION_DATA_WRITE =
-//        "com.example.bluetooth.le.ACTION_DATA_WRITE";
+        "com.example.testApplication.EXTRA_DATA";
+    public final static String DEVICE_DOES_NOT_SUPPORT_HRM =
+        "com.example.testApplication.DEVICE_DOES_NOT_SUPPORT_HRM";
 
+
+    public final static UUID UUID_HEART_RATE = UUID.fromString(GattAttributes.HEART_RATE);
     public final static UUID UUID_HEART_RATE_MEASUREMENT =
         UUID.fromString(GattAttributes.HEART_RATE_MEASUREMENT);
 
@@ -106,7 +104,7 @@ public class BluetoothLeService extends Service {
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
-            Log.d("" + TAG, "onCharacteristicChanged :" + characteristic);
+            Log.d(TAG, "onCharacteristicChanged");
 
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
         }
@@ -136,7 +134,7 @@ public class BluetoothLeService extends Service {
 
     private void broadcastUpdate(final String action,
                                  final BluetoothGattCharacteristic characteristic) {
-        Log.d(TAG, "broadcastUpdate " + action);
+        Log.d(TAG, "broadcastUpdate : " + action);
 
         final Intent intent = new Intent(action);
 
@@ -144,6 +142,7 @@ public class BluetoothLeService extends Service {
         // carried out as per profile specifications:
         // http://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.heart_rate_measurement.xml
         if (UUID_HEART_RATE_MEASUREMENT.equals(characteristic.getUuid())) {
+            Log.d(TAG, "broadcastUpdate UUID_HEART_RATE_MEASUREMENT");
             int flag = characteristic.getProperties();
             int format = -1;
             if ((flag & 0x01) != 0) {
@@ -289,6 +288,7 @@ public class BluetoothLeService extends Service {
             Log.w(TAG, "BluetoothAdapter not initialized");
             return;
         }
+        Log.d(TAG, "readCharacteristic : " + characteristic);
         mBluetoothGatt.readCharacteristic(characteristic);
     }
 
@@ -313,6 +313,32 @@ public class BluetoothLeService extends Service {
             descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
             mBluetoothGatt.writeDescriptor(descriptor);
         }
+    }
+
+    public void setHeartRateNotification() {
+        BluetoothGattService hrService = mBluetoothGatt.getService(UUID_HEART_RATE);
+        Log.d(TAG, "mBluetoothGatt.getService : " + mBluetoothGatt.getService(UUID_HEART_RATE));
+        Log.d(TAG, "hrService : " + hrService);
+        if (hrService == null) {
+            Log.w(TAG, "Heart Rate service Not found");
+            broadcastUpdate(DEVICE_DOES_NOT_SUPPORT_HRM);
+            return;
+        }
+
+        BluetoothGattCharacteristic hrmChar = hrService.getCharacteristic(UUID_HEART_RATE_MEASUREMENT);
+        Log.d(TAG, "hrService.getCharacteristic : " + hrService.getCharacteristic(UUID_HEART_RATE_MEASUREMENT));
+        Log.d(TAG, "hrmChar : " + hrmChar);
+        if (hrmChar == null) {
+            Log.w(TAG, "Heart Rate Measurement characteristic Not found");
+            broadcastUpdate(DEVICE_DOES_NOT_SUPPORT_HRM);
+            return;
+        }
+
+        mBluetoothGatt.setCharacteristicNotification(hrmChar, true);
+        BluetoothGattDescriptor descriptor = hrmChar.getDescriptor(
+            UUID.fromString(GattAttributes.CLIENT_CHARACTERISTIC_CONFIG));
+        descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+        mBluetoothGatt.writeDescriptor(descriptor);
     }
 
     /**

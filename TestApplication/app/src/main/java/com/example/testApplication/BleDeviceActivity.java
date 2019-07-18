@@ -25,11 +25,24 @@ public class BleDeviceActivity extends AppCompatActivity {
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
     public static final String EXTRAS_DEVICE_ADDRESS = "DEVICE_ADDRESS";
 
+    private static final boolean STATE_STOP = false;
+    private static final boolean STATE_RUNNING = true;
+
     private static final String TAG = BleDeviceActivity.class.getSimpleName();
 
     private final String LIST_NAME = "NAME";
     private final String LIST_UUID = "UUID";
-    //    private final String LIST_VALUE = "VALUE";
+    private final String LIST_VALUE = "VALUE";
+
+    private TextView deviceAddressTextView, connectionStateTextView;
+    private Button connectionButton;
+    private Button readDataButton;
+    private ExpandableListView servicesListView;
+
+    // state of connecting gatt server
+    private boolean mConnected = false;
+    private boolean mReading = STATE_STOP;
+    private BluetoothLeService mBluetoothLeService;
     // Code to manage Service lifecycle.
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
@@ -48,13 +61,6 @@ public class BleDeviceActivity extends AppCompatActivity {
             mBluetoothLeService = null;
         }
     };
-    private TextView deviceAddressTextView, connectionStateTextView;
-    private Button connectionButton;
-    private ExpandableListView servicesListView;
-    // state of connecting gatt server
-    private boolean mConnected = false;
-    private BluetoothLeService mBluetoothLeService;
-    private String mDeviceName = "null", mDeviceAddress;
     private ArrayList<ArrayList<BluetoothGattCharacteristic>> mGattCharacteristics =
         new ArrayList<>();
     // Handles various events fired by the Service.
@@ -67,18 +73,19 @@ public class BleDeviceActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
+            if (action.equals(BluetoothLeService.ACTION_GATT_CONNECTED)) {
                 Log.d(TAG, "Connect");
                 mConnected = true;
                 updateConnectionState(R.string.title_connect);
 
-            } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
+            } else if (action.equals(BluetoothLeService.ACTION_GATT_DISCONNECTED)) {
                 Log.d(TAG, "disconnect");
                 mConnected = false;
                 updateConnectionState(R.string.title_disconnect);
                 connectionButton.setText(R.string.title_connect);
+                mBluetoothLeService.close();
 
-            } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
+            } else if (action.equals(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED)) {
                 Log.d(TAG, "Services Discovered");
 
                 List<BluetoothGattService> gattServices = mBluetoothLeService.getSupportedGattServices();
@@ -93,7 +100,6 @@ public class BleDeviceActivity extends AppCompatActivity {
                     = new ArrayList<>();
                 mGattCharacteristics = new ArrayList<>();
 
-                Log.d(TAG, "gattServices\n" + gattServices);
                 for (BluetoothGattService gattService : gattServices) {
                     HashMap<String, String> currentServiceData = new HashMap<>();
                     uuid = gattService.getUuid().toString();
@@ -112,7 +118,6 @@ public class BleDeviceActivity extends AppCompatActivity {
                     for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics)
                         mBluetoothLeService.readCharacteristic(gattCharacteristic);
 
-                    Log.d(TAG, "gattCharacteristics" + gattCharacteristics);
                     // Loops through available Characteristics.
                     for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
                         charas.add(gattCharacteristic);
@@ -123,24 +128,35 @@ public class BleDeviceActivity extends AppCompatActivity {
 
                         currentCharaData.put(LIST_UUID, uuid);
                         gattCharacteristicGroupData.add(currentCharaData);
+
+                        // HEART_RATE_MEASUREMENT  setCharacteristicNotification
+//                        if (gattCharacteristic.getUuid().equals(BluetoothLeService.UUID_HEART_RATE_MEASUREMENT)) {
+//                            Log.d(TAG, "setCharacteristicNotification");
+//                            mBluetoothLeService.setCharacteristicNotification(gattCharacteristic, true);
+//                            mBluetoothLeService.readCharacteristic(gattService.getCharacteristic(BluetoothLeService.UUID_HEART_RATE_MEASUREMENT));
+//                        }
                     }
+
                     mGattCharacteristics.add(charas);
                     gattCharacteristicData.add(gattCharacteristicGroupData);
                 }
-                Log.d(TAG, "gattServiceData\n" + gattServiceData);
-                Log.d(TAG, "gattCharacteristicData\n" + gattCharacteristicData);
 
-                // TODO groupView 클릭시 다른 group childView 내용이 변경되는 문제
                 DeviceExpandableListAdapter gattServiceAdapter = new DeviceExpandableListAdapter(BleDeviceActivity.this, gattServiceData, gattCharacteristicData);
                 servicesListView.setAdapter(gattServiceAdapter);
-            } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
+
+                mBluetoothLeService.setHeartRateNotification();
+            } else if (action.equals(BluetoothLeService.ACTION_DATA_AVAILABLE)) {
                 Log.d(TAG, "Data Available");
-                if (BluetoothLeService.EXTRA_DATA.equals(action)) {
-                    Log.d(TAG, "EXTRA_DATA");
-                }
+
+                final String hrmValue = intent.getStringExtra(BluetoothLeService.EXTRA_DATA);
+                Log.d(TAG, hrmValue);
+            } else if (action.equals(BluetoothLeService.DEVICE_DOES_NOT_SUPPORT_HRM)) {
+                Log.w(TAG, "DEVICE_DOES_NOT_SUPPORT_HRM");
             }
+
         }
     };
+    private String mDeviceName = "null", mDeviceAddress = "null";
 
     private static IntentFilter makeGattUpdateIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
@@ -167,6 +183,18 @@ public class BleDeviceActivity extends AppCompatActivity {
                     mBluetoothLeService.connect(mDeviceAddress);
                     connectionStateTextView.setText(R.string.title_connecting);
                     connectionButton.setText(R.string.title_disconnect);
+                }
+            }
+        });
+
+        readDataButton = findViewById(R.id.readData_button);
+        readDataButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mReading == STATE_RUNNING) {
+                    mReading = STATE_STOP;
+                } else {
+                    mReading = STATE_RUNNING;
                 }
             }
         });

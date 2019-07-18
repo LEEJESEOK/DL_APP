@@ -8,7 +8,7 @@
     <string name="activity_title_BLE">BLE Activity</string>
     <string name="activity_title_BLEDevice">BLE Device Activity</string>
 
-    <string name="scan_button">Scan for devices</string>
+    <string name="scan">Scan for devices</string>
     <string name="stop">Stop</string>
 
     <string name="searching_filter_hint">Filter by name or Address</string>
@@ -17,9 +17,10 @@
     <string name="error_bluetooth_not_supported">Bluetooth not supported.</string>
     <string name="bt_not_enabled_leaving">Bluetooth was not enabled. Leaving Bluetooth Chat.</string>
 
-    <string name="label_device_address">Device address:</string>
+    <string name="label_device_address">Device address : </string>
     <string name="label_data">Data:</string>
     <string name="label_state">State:</string>
+    <string name="read_data">read data</string>
     <string name="no_data">No data</string>
 
     <string name="unknown_device">Unknown device</string>

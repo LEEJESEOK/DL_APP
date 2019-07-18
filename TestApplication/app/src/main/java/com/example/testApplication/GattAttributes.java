@@ -24,7 +24,6 @@ import java.util.HashMap;
 public class GattAttributes {
     // Generic Access
     public static String DEVICE_NAME = "00002a00-0000-1000-8000-00805f9b34fb";
-    public static String HEART_RATE_MEASUREMENT = "00002a37-0000-1000-8000-00805f9b34fb";
     public static String CLIENT_CHARACTERISTIC_CONFIG = "00002902-0000-1000-8000-00805f9b34fb";
     // Tx Power
     public static String TX_POWER_LEVEL = "00002a07-0000-1000-8000-00805f9b34fb";
@@ -34,6 +33,11 @@ public class GattAttributes {
     public static String ALERT_LEVEL = "00002a06-0000-1000-8000-00805f9b34fb";
     // Battery Service
     public static String BATTERY_LEVEL = "00002a19-0000-1000-8000-00805f9b34fb";
+
+    // Heart Rate
+    public static String HEART_RATE = "0000180d-0000-1000-8000-00805f9b34fb";
+    public static String HEART_RATE_MEASUREMENT = "00002a37-0000-1000-8000-00805f9b34fb";
+
     private static HashMap<String, String> attributes = new HashMap<>();
 
     static {
@@ -55,7 +59,7 @@ public class GattAttributes {
 
         // Heart Rate Monitor
         // Sample Services.
-        attributes.put("0000180d-0000-1000-8000-00805f9b34fb", "Heart Rate Service");
+        attributes.put(HEART_RATE, "Heart Rate Service");
         attributes.put("0000180a-0000-1000-8000-00805f9b34fb", "Device Information Service");
         // Sample Characteristics.
         attributes.put(HEART_RATE_MEASUREMENT, "Heart Rate Measurement");
