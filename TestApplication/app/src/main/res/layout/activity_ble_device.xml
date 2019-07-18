@@ -7,6 +7,15 @@
     android:orientation="vertical"
     tools:context=".BleDeviceActivity">
 
+
+    <Button
+        android:id="@+id/readData_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="24dp"
+        android:text="@string/read_data"
+        android:textSize="24sp" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -46,15 +55,33 @@
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/readData_button"
+    <TextView
+        android:id="@+id/state_textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/read_data" />
+        android:layout_margin="8dp"
+        android:text="@string/stop"
+        android:textSize="16sp" />
 
-    <ExpandableListView
-        android:id="@+id/services_listView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    <ScrollView
+        android:id="@+id/log_scrollView"
+        android:layout_width="350dp"
+        android:layout_height="350dp">
+
+        <TextView
+            android:id="@+id/log_textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusable="false"
+            android:textSize="16sp" />
+
+    </ScrollView>
+
+    <Button
+        android:id="@+id/clear_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="@string/clear" />
 
 </LinearLayout>

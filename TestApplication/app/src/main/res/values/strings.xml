@@ -12,6 +12,7 @@
     <string name="stop">Stop</string>
 
     <string name="searching_filter_hint">Filter by name or Address</string>
+    <string name="clear">clear</string>
 
     <string name="ble_not_supported">BLE is not supported</string>
     <string name="error_bluetooth_not_supported">Bluetooth not supported.</string>

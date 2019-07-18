@@ -23,15 +23,28 @@ import java.util.HashMap;
  */
 public class GattAttributes {
     // Generic Access
+    public static String GENERIC_ACCESS = "00001800-0000-1000-8000-00805f9b34fb";
     public static String DEVICE_NAME = "00002a00-0000-1000-8000-00805f9b34fb";
     public static String CLIENT_CHARACTERISTIC_CONFIG = "00002902-0000-1000-8000-00805f9b34fb";
+
+    // Generic Attribute
+    public static String GENERIC_ATTRIBUTE = "00001801-0000-1000-8000-00805f9b34fb";
+
     // Tx Power
+    public static String TX_POWER = "00001804-0000-1000-8000-00805f9b34fb";
     public static String TX_POWER_LEVEL = "00002a07-0000-1000-8000-00805f9b34fb";
     public static String APPEARANCE = "00002a01-0000-1000-8000-00805f9b34fb";
     public static String PERIPHERAL_PREFERRED_CONNECTION_PARAMS = "00002a04-0000-1000-8000-00805f9b34fb";
+
     // Immediate Alert
+    public static String IMMEDIATE_ALERT = "00001802-0000-1000-8000-00805f9b34fb";
     public static String ALERT_LEVEL = "00002a06-0000-1000-8000-00805f9b34fb";
+
+    // Link Loss
+    public static String LINK_LOSS = "00001803-0000-1000-8000-00805f9b34fb";
+
     // Battery Service
+    public static String BATTERY_SERVICE = "0000180f-0000-1000-8000-00805f9b34fb";
     public static String BATTERY_LEVEL = "00002a19-0000-1000-8000-00805f9b34fb";
 
     // Heart Rate
@@ -42,12 +55,13 @@ public class GattAttributes {
 
     static {
         // Nordic nRF5x Proximity Services.
-        attributes.put("00001800-0000-1000-8000-00805f9b34fb", "Generic Access");
-        attributes.put("00001801-0000-1000-8000-00805f9b34fb", "Generic Attribute");
-        attributes.put("00001804-0000-1000-8000-00805f9b34fb", "Tx Power");
-        attributes.put("00001802-0000-1000-8000-00805f9b34fb", "Immediate Alert");
-        attributes.put("00001803-0000-1000-8000-00805f9b34fb", "Link Loss");
-        attributes.put("0000180f-0000-1000-8000-00805f9b34fb", "Battery Service");
+        attributes.put(GENERIC_ACCESS, "Generic Access");
+        attributes.put(GENERIC_ATTRIBUTE, "Generic Attribute");
+        attributes.put(TX_POWER, "Tx Power");
+        attributes.put(IMMEDIATE_ALERT, "Immediate Alert");
+        attributes.put(LINK_LOSS, "Link Loss");
+        attributes.put(BATTERY_SERVICE, "Battery Service");
+
         // Nordic nRF5x Proximity Characteristics
         attributes.put(DEVICE_NAME, "Device Name");
         attributes.put(APPEARANCE, "Appearance");

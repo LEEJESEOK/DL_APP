@@ -191,7 +191,6 @@ public class BleScanActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ble_scan);
 
-
         // Checks if BLE is supported on the device.
         if (!(getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE))) {
             Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
