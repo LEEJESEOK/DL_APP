@@ -51,6 +51,11 @@ public class GattAttributes {
     public static String HEART_RATE = "0000180d-0000-1000-8000-00805f9b34fb";
     public static String HEART_RATE_MEASUREMENT = "00002a37-0000-1000-8000-00805f9b34fb";
 
+    // Nordic UART Service
+    public static String NORDIC_UART_SERVICE = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+    public static String TX_CHARACTERISTIC = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+    public static String RX_CHARACTERISTIC = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+
     private static HashMap<String, String> attributes = new HashMap<>();
 
     static {
@@ -60,6 +65,8 @@ public class GattAttributes {
         attributes.put(TX_POWER, "Tx Power");
         attributes.put(IMMEDIATE_ALERT, "Immediate Alert");
         attributes.put(LINK_LOSS, "Link Loss");
+        attributes.put(NORDIC_UART_SERVICE, "Nordic UART Service");
+
         attributes.put(BATTERY_SERVICE, "Battery Service");
 
         // Nordic nRF5x Proximity Characteristics
@@ -69,13 +76,14 @@ public class GattAttributes {
         attributes.put(TX_POWER_LEVEL, "Tx Power Level");
         attributes.put(ALERT_LEVEL, "Alert Level");
         attributes.put(BATTERY_LEVEL, "Battery Level");
+        attributes.put(TX_CHARACTERISTIC, "Tx Characteristic");
+        attributes.put(RX_CHARACTERISTIC, "Rx Characteristic");
+
 
 
         // Heart Rate Monitor
-        // Sample Services.
         attributes.put(HEART_RATE, "Heart Rate Service");
         attributes.put("0000180a-0000-1000-8000-00805f9b34fb", "Device Information Service");
-        // Sample Characteristics.
         attributes.put(HEART_RATE_MEASUREMENT, "Heart Rate Measurement");
         attributes.put("00002a29-0000-1000-8000-00805f9b34fb", "Manufacturer Name String");
     }

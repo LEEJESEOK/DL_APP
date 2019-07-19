@@ -39,6 +39,8 @@ import static com.example.testApplication.BleDeviceActivity.EXTRAS_CHARACTERISTI
 import static com.example.testApplication.GattAttributes.DEVICE_NAME;
 import static com.example.testApplication.GattAttributes.GENERIC_ACCESS;
 import static com.example.testApplication.GattAttributes.HEART_RATE_MEASUREMENT;
+import static com.example.testApplication.GattAttributes.RX_CHARACTERISTIC;
+import static com.example.testApplication.GattAttributes.TX_CHARACTERISTIC;
 import static com.example.testApplication.GattAttributes.lookup;
 
 /**
@@ -58,6 +60,8 @@ public class BluetoothLeService extends Service {
         "com.example.testApplication.EXTRA_DATA";
     public final static String DEVICE_DOES_NOT_SUPPORT_HRM =
         "com.example.testApplication.DEVICE_DOES_NOT_SUPPORT_HRM";
+    public final static String DEVICE_DOES_NOT_SUPPORT_UART =
+        "com.example.testApplication.DEVICE_DOES_NOT_SUPPORT_UART";
 
     public final static UUID UUID_GENERIC_ACCESS = UUID.fromString(GENERIC_ACCESS);
     public final static UUID UUID_DEVICE_NAME = UUID.fromString(DEVICE_NAME);
@@ -65,6 +69,13 @@ public class BluetoothLeService extends Service {
     public final static UUID UUID_HEART_RATE = UUID.fromString(GattAttributes.HEART_RATE);
     public final static UUID UUID_HEART_RATE_MEASUREMENT =
         UUID.fromString(HEART_RATE_MEASUREMENT);
+
+    public final static UUID UUID_NORDIC_UART_SERVICE =
+        UUID.fromString(GattAttributes.NORDIC_UART_SERVICE);
+    public final static UUID UUID_TX_CHARACTERISTIC =
+        UUID.fromString(TX_CHARACTERISTIC);
+    public final static UUID UUID_RX_CHARACTERISTIC =
+        UUID.fromString(RX_CHARACTERISTIC);
 
     private final static String TAG = BluetoothLeService.class.getSimpleName();
 
@@ -374,6 +385,25 @@ public class BluetoothLeService extends Service {
             return mBluetoothGatt.setCharacteristicNotification(hrmChar, enable);
 
         }
+    }
+
+    public void writeRXCharacteristic(byte[] value) {
+        BluetoothGattService UARTService = mBluetoothGatt.getService(UUID_NORDIC_UART_SERVICE);
+        if (UARTService == null) {
+            Log.w(TAG, "Nordic UART Service Not found");
+            broadcastUpdate(DEVICE_DOES_NOT_SUPPORT_UART);
+            return;
+        }
+        BluetoothGattCharacteristic RxChar = UARTService.getCharacteristic(UUID_RX_CHARACTERISTIC);
+        if (RxChar == null) {
+            Log.w(TAG, "Rx Characteristic Not found");
+            broadcastUpdate(DEVICE_DOES_NOT_SUPPORT_UART);
+            return;
+        }
+        RxChar.setValue(value);
+        boolean status = mBluetoothGatt.writeCharacteristic(RxChar);
+        Log.d(TAG, "" + RxChar);
+        Log.d(TAG, "write TXchar - status=" + status);
     }
 
     /**

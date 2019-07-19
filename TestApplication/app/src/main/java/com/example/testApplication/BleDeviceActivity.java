@@ -14,9 +14,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -35,13 +37,16 @@ public class BleDeviceActivity extends AppCompatActivity {
 
     private final String LIST_NAME = "NAME";
     private final String LIST_UUID = "UUID";
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
+    private SimpleDateFormat currentDateFormat = new SimpleDateFormat("HH:mm:ss");
+    private SimpleDateFormat elapsedDateFormat = new SimpleDateFormat("SSS");
     private TextView deviceAddressTextView, connectionStateTextView;
     private Button connectionButton;
-    private Button readDataButton;
     private TextView stateTextView;
+    private Button readDataButton;
     private TextView logTextView;
     private Button clearButton;
+    private EditText messageEditText;
+    private Button sendButton;
     // state of connecting gatt server
     private String mDeviceName = "null", mDeviceAddress = "null";
     private boolean mConnected = false;
@@ -67,9 +72,8 @@ public class BleDeviceActivity extends AppCompatActivity {
     };
     private ArrayList<ArrayList<BluetoothGattCharacteristic>> mGattCharacteristics =
         new ArrayList<>();
-    private long time;
-    private Date date = new Date(time);
-    String formatDate = simpleDateFormat.format(date);
+    private Date date;
+    private String formatDate;
 
     // Handles various events fired by the Service.
     // ACTION_GATT_CONNECTED: connected to a GATT server.
@@ -81,6 +85,7 @@ public class BleDeviceActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
+
             if (action.equals(BluetoothLeService.ACTION_GATT_CONNECTED)) {
                 Log.d(TAG, "Connect");
                 mConnected = true;
@@ -144,7 +149,6 @@ public class BleDeviceActivity extends AppCompatActivity {
                     mGattCharacteristics.add(charas);
                     gattCharacteristicData.add(gattCharacteristicGroupData);
                 }
-
                 logMessage("Service Discovered");
 
                 if (!mBluetoothLeService.setHeartRateNotification(mReading)) {
@@ -169,9 +173,14 @@ public class BleDeviceActivity extends AppCompatActivity {
                 Log.w(TAG, "DEVICE_DOES_NOT_SUPPORT_HRM");
                 Toast.makeText(BleDeviceActivity.this, "DEVICE_DOES_NOT_SUPPORT_HRM", Toast.LENGTH_SHORT).show();
                 logMessage("Can not connected Heart rate monitor");
-                readDataButton.callOnClick();
-            }
 
+
+                readDataButton.callOnClick();
+            } else if (action.equals(BluetoothLeService.DEVICE_DOES_NOT_SUPPORT_UART)) {
+                Log.w(TAG, "DEVICE_DOES_NOT_SUPPORT_UART");
+                Toast.makeText(BleDeviceActivity.this, "DEVICE_DOES_NOT_SUPPORT_UART", Toast.LENGTH_SHORT).show();
+                logMessage("Can not connected Nordic UART Service");
+            }
         }
     };
 
@@ -187,6 +196,7 @@ public class BleDeviceActivity extends AppCompatActivity {
     private void setLayout() {
         deviceAddressTextView = findViewById(R.id.deviceAddress_textView);
         deviceAddressTextView.setText(getString(R.string.label_device_address).concat(mDeviceAddress));
+
         connectionStateTextView = findViewById(R.id.connectionState_textView);
         connectionButton = findViewById(R.id.connection_button);
         connectionButton.setOnClickListener(new View.OnClickListener() {
@@ -204,6 +214,8 @@ public class BleDeviceActivity extends AppCompatActivity {
             }
         });
 
+        stateTextView = findViewById(R.id.readState_textView);
+
         readDataButton = findViewById(R.id.readData_button);
         readDataButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -211,7 +223,7 @@ public class BleDeviceActivity extends AppCompatActivity {
                 if (mReading) {
                     mReading = STATE_STOP;
                     readDataButton.setText(R.string.read_data);
-                    stateTextView.setText(R.string.read_data);
+                    stateTextView.setText(R.string.stop);
                 } else {
                     if (!mConnected) {
                         Log.d(TAG, "" + getString(R.string.title_disconnect));
@@ -221,13 +233,30 @@ public class BleDeviceActivity extends AppCompatActivity {
                     }
                     mReading = STATE_RUNNING;
                     readDataButton.setText(R.string.stop);
-                    stateTextView.setText(R.string.stop);
+                    stateTextView.setText(R.string.reading);
                 }
                 mBluetoothLeService.setHeartRateNotification(mReading);
             }
         });
 
-        stateTextView = findViewById(R.id.state_textView);
+        messageEditText = findViewById(R.id.message_editText);
+
+        sendButton = findViewById(R.id.send_button);
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    String message = messageEditText.getText().toString();
+                    byte[] value;
+                    value = message.getBytes("UTF-8");
+                    mBluetoothLeService.writeRXCharacteristic(value);
+                    messageEditText.setText("");
+                    logMessage("[Tx]message : " + message);
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 
         logTextView = findViewById(R.id.log_textView);
 //        logTextView.setMovementMethod(new ScrollingMovementMethod());
@@ -253,12 +282,11 @@ public class BleDeviceActivity extends AppCompatActivity {
     }
 
     private void logMessage(String msg) {
-        time = System.currentTimeMillis();
-        date = new Date(time);
-        formatDate = simpleDateFormat.format(date);
-
+        long currentTime = System.currentTimeMillis();
+        date = new Date(currentTime);
+        formatDate = currentDateFormat.format(date);
         logTextView.append("[" + formatDate + "] / " + msg + "\n");
-
+        //TODO log 스크롤
 //        final int scrollAmount = logTextView.getLayout().getLineTop(logTextView.getLineCount()) - logTextView.getHeight();
 //
 //        Log.d(TAG, "logMessage : logTextView.getLayout().getLineTop(logTextView.getLineCount())" + logTextView.getLayout().getLineTop(logTextView.getLineCount()));
@@ -267,6 +295,12 @@ public class BleDeviceActivity extends AppCompatActivity {
 //
 //        if (scrollAmount > 0)
 //            logTextView.scrollTo(0, scrollAmount);
+    }
+
+    private void logElapsed(long elapsed) {
+        date = new Date(elapsed);
+        formatDate = elapsedDateFormat.format(date);
+        logTextView.append("(" + formatDate + "ms)\n");
     }
 
     @Override
