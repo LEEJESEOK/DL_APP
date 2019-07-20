@@ -2,12 +2,7 @@ package com.example.testApplication;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
+import android.content.*;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
@@ -130,14 +125,11 @@ public class BleDeviceActivity extends AppCompatActivity {
                 Log.d(TAG, "gattServiceData\n" + gattServiceData);
                 Log.d(TAG, "gattCharacteristicData\n" + gattCharacteristicData);
 
-                // TODO groupView ≈¨∏ØΩ√ ¥Ÿ∏• group childView ≥ªøÎ¿Ã ∫Ø∞Êµ«¥¬ πÆ¡¶
+                // TODO groupView ÌÅ¥Î¶≠Ïãú Îã§Î•∏ group childView ÎÇ¥Ïö©Ïù¥ Î≥ÄÍ≤ΩÎêòÎäî Î¨∏Ï†ú
                 DeviceExpandableListAdapter gattServiceAdapter = new DeviceExpandableListAdapter(BleDeviceActivity.this, gattServiceData, gattCharacteristicData);
                 servicesListView.setAdapter(gattServiceAdapter);
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
                 Log.d(TAG, "Data Available");
-                if (BluetoothLeService.EXTRA_DATA.equals(action)) {
-                    Log.d(TAG, "EXTRA_DATA");
-                }
             }
         }
     };
