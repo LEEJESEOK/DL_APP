@@ -19,12 +19,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
-import android.widget.Toast;
+import android.widget.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -144,7 +139,7 @@ public class BleScanActivity extends AppCompatActivity {
 
         deviceArrayList = new ArrayList<>();
         deviceListAdapter = new SimpleAdapter(this, deviceArrayList, android.R.layout.simple_list_item_2, new String[]{"name", "address"},
-            new int[]{android.R.id.text1, android.R.id.text2});
+                new int[]{android.R.id.text1, android.R.id.text2});
         deviceListView = findViewById(R.id.device_listView);
         deviceListView.setAdapter(deviceListAdapter);
         deviceListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -212,7 +207,7 @@ public class BleScanActivity extends AppCompatActivity {
         }
 
         final BluetoothManager bluetoothManager =
-            (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+                (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
 
         // Checks if Bluetooth is supported on the device.
