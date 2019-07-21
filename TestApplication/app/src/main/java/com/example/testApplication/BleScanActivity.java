@@ -45,8 +45,6 @@ public class BleScanActivity extends AppCompatActivity {
 
     private BluetoothLeScanner mBLEScanner;
     private Button scanButton;
-    //    private Button disconnectButton;
-    //TODO name, address filter
     private EditText searchEditText;
     private ListView deviceListView;
     private ArrayList<ListViewItem> deviceList;
@@ -122,7 +120,6 @@ public class BleScanActivity extends AppCompatActivity {
             }
         });
 
-        //TODO name, address filter
         searchEditText = findViewById(R.id.search_editText);
         searchEditText.addTextChangedListener(new TextWatcher() {
             @Override

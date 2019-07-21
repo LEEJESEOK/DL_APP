@@ -125,7 +125,6 @@ public class BleDeviceActivity extends AppCompatActivity {
                 Log.d(TAG, "gattServiceData\n" + gattServiceData);
                 Log.d(TAG, "gattCharacteristicData\n" + gattCharacteristicData);
 
-                // TODO groupView 클릭시 다른 group childView 내용이 변경되는 문제
                 DeviceExpandableListAdapter gattServiceAdapter = new DeviceExpandableListAdapter(BleDeviceActivity.this, gattServiceData, gattCharacteristicData);
                 servicesListView.setAdapter(gattServiceAdapter);
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
