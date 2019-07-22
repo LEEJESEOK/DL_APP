@@ -17,17 +17,13 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
-import android.widget.Toast;
+import android.widget.*;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -49,11 +45,10 @@ public class BleScanActivity extends AppCompatActivity {
 
     private BluetoothLeScanner mBLEScanner;
     private Button scanButton;
-    //TODO name, address filter
     private EditText searchEditText;
     private ListView deviceListView;
-    private ArrayList<HashMap<String, String>> deviceArrayList;
-    private SimpleAdapter deviceListAdapter;
+    private ArrayList<ListViewItem> deviceList;
+    private ListViewAdapter deviceListAdapter;
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private final ScanCallback mScanCallback = new ScanCallback() {
 
@@ -76,35 +71,34 @@ public class BleScanActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    HashMap<String, String> item = new HashMap<>();
+                    ListViewItem item = new ListViewItem();
                     boolean itemFlag = true;
 
-                    // 이름 검색 안된 device
-                    if (result.getDevice().getName() == null)
-                        item.put("name", "unknown");
-                    else
-                        item.put("name", result.getDevice().getName());
-
-                    item.put("address", result.getDevice().getAddress());
+                    if (result.getDevice().getName() == null) {
+                        item.setDeviceName("unknown");
+                    } else
+                        item.setDeviceName(result.getDevice().getName());
+                    item.setDeviceAddress(result.getDevice().getAddress());
 
                     // 이미 검색된 기기(주소)일 경우 추가하지 않음, 이름이 확인될 경우 갱신
                     // contains 메소드로 수정 가능
-                    for (HashMap<String, String> i : deviceArrayList)
-                        if (Objects.requireNonNull(i.get("address")).equals(item.get("address"))) {
-                            i.put("name", item.get("name"));
+                    for (ListViewItem i : deviceList) {
+                        if (Objects.requireNonNull(i.getDeviceAddress()).equals(item.getDeviceAddress())) {
+                            i.setDeviceName(item.getDeviceName());
                             itemFlag = false;
                             break;
                         }
+                    }
 
-                    if (itemFlag)
-                        deviceArrayList.add(item);
+                    if (itemFlag) {
+                        deviceList.add(item);
+                    }
 
                     deviceListAdapter.notifyDataSetChanged();
                 }
             });
         }
     };
-
 
     private void setLayout() {
         scanButton = findViewById(R.id.scan_button);
@@ -113,7 +107,6 @@ public class BleScanActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (mScanning == STATE_STOP) { // scan start
                     startScan();
-
                     // SCAN_PERIOD 후에 stop scan
                     new Handler().postDelayed(new Runnable() {
                         @Override
@@ -126,23 +119,36 @@ public class BleScanActivity extends AppCompatActivity {
             }
         });
 
-        //TODO name, address filter
         searchEditText = findViewById(R.id.search_editText);
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
 
-        deviceArrayList = new ArrayList<>();
-        deviceListAdapter = new SimpleAdapter(this, deviceArrayList, android.R.layout.simple_list_item_2, new String[]{"name", "address"},
-            new int[]{android.R.id.text1, android.R.id.text2});
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String filterText = editable.toString();
+
+                ((ListViewAdapter) deviceListView.getAdapter()).getFilter().filter(filterText);
+            }
+        });
+
+        deviceList = new ArrayList<>();
+        deviceListAdapter = new ListViewAdapter(deviceList);
         deviceListView = findViewById(R.id.device_listView);
         deviceListView.setAdapter(deviceListAdapter);
         deviceListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                mDeviceAddress = deviceArrayList.get(position).get("address");
-//                connectDevice(mDeviceAddress);
                 String name, address;
 
-                name = deviceArrayList.get(position).get("name");
-                address = deviceArrayList.get(position).get("address");
+                name = deviceList.get(position).getDeviceName();
+                address = deviceList.get(position).getDeviceAddress();
 
                 final Intent intent = new Intent(BleScanActivity.this, BleDeviceActivity.class);
                 intent.putExtra(BleDeviceActivity.EXTRAS_DEVICE_NAME, name);
@@ -152,6 +158,7 @@ public class BleScanActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        deviceListView.setTextFilterEnabled(true);
     }
 
     private void startScan() {
@@ -159,7 +166,7 @@ public class BleScanActivity extends AppCompatActivity {
         scanButton.setText(R.string.stop);
         Log.d(TAG, "click scan button");
 
-        deviceArrayList.clear();
+        deviceList.clear();
         deviceListAdapter.notifyDataSetChanged();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -177,15 +184,6 @@ public class BleScanActivity extends AppCompatActivity {
         }
     }
 
-//    private void connectDevice(final String address) {
-//        Log.d(TAG, "address : " + address);
-//        if (mBluetoothLeService.connect(address)) {
-//            Toast.makeText(BleScanActivity.this, "connect", Toast.LENGTH_SHORT).show();
-//
-//            disconnectButton.setVisibility(View.VISIBLE);
-//        }
-//    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -197,11 +195,9 @@ public class BleScanActivity extends AppCompatActivity {
             Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
             finish();
         }
-
         final BluetoothManager bluetoothManager =
-            (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+                (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
-
         // Checks if Bluetooth is supported on the device.
         if (mBluetoothAdapter == null) {
             Toast.makeText(this, R.string.error_bluetooth_not_supported, Toast.LENGTH_SHORT).show();
@@ -209,7 +205,7 @@ public class BleScanActivity extends AppCompatActivity {
             return;
         }
 
-        // bluetooth scan accuracy increase
+        // bluetooth scan accuracy increase using GPS
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED) {
                 Log.d(TAG, "FINE LOCATION");

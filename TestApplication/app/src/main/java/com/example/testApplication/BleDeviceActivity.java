@@ -2,12 +2,7 @@ package com.example.testApplication;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
+import android.content.*;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
@@ -128,13 +123,6 @@ public class BleDeviceActivity extends AppCompatActivity {
 
                         currentCharaData.put(LIST_UUID, uuid);
                         gattCharacteristicGroupData.add(currentCharaData);
-
-                        // HEART_RATE_MEASUREMENT  setCharacteristicNotification
-//                        if (gattCharacteristic.getUuid().equals(BluetoothLeService.UUID_HEART_RATE_MEASUREMENT)) {
-//                            Log.d(TAG, "setCharacteristicNotification");
-//                            mBluetoothLeService.setCharacteristicNotification(gattCharacteristic, true);
-//                            mBluetoothLeService.readCharacteristic(gattService.getCharacteristic(BluetoothLeService.UUID_HEART_RATE_MEASUREMENT));
-//                        }
                     }
 
                     mGattCharacteristics.add(charas);
@@ -153,7 +141,6 @@ public class BleDeviceActivity extends AppCompatActivity {
             } else if (action.equals(BluetoothLeService.DEVICE_DOES_NOT_SUPPORT_HRM)) {
                 Log.w(TAG, "DEVICE_DOES_NOT_SUPPORT_HRM");
             }
-
         }
     };
     private String mDeviceName = "null", mDeviceAddress = "null";
