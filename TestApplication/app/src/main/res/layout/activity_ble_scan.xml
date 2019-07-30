@@ -30,7 +30,7 @@
         android:layout_height="wrap_content"
         android:focusable="auto"
         android:hint="@string/searching_filter_hint"
-        android:inputType="text" />
+        android:inputType="textFilter" />
 
     <ListView
         android:id="@+id/device_listView"
